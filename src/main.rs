@@ -1,5 +1,6 @@
 use std::error;
 
+mod find;
 mod tmux;
 
 fn main() -> Result<(), Box<dyn error::Error>> {
