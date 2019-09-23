@@ -3,6 +3,8 @@ use std::error;
 mod tmux;
 
 fn main() -> Result<(), Box<dyn error::Error>> {
-    println!("{}", tmux::active()?);
+    let pane = tmux::active()?;
+    let text = tmux::capture(&pane)?;
+    println!("{}", text);
     Ok(())
 }
