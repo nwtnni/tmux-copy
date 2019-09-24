@@ -22,51 +22,46 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let mut stdout = io::stdout();
     let mut term = term::Term::new(&mut stdin, &mut stdout)?;
 
-    write!(&mut term, "{}", text)?;
-
     let matches = find::matches(&text);
-    let mut map = HashMap::with_capacity(matches.len());
 
-    write!(&mut term, "{}", ansi::RED)?;
+    write!(&mut term, "{}{}", text, ansi::RED)?;
 
-    for (r#match, hint) in matches.iter().zip(hint::hints(matches.len())) {
-        map.insert(hint, r#match);
-        let go = ansi::Go(r#match.col as u16, r#match.row as u16);
-        write!(&mut term, "{}{}", go, hint)?;
-    }
+    let mut hints = hint::hints(matches.len())
+        .zip(&matches)
+        .inspect(|(h, m)| {
+            write!(&mut term, "{}{}", ansi::Go(m.col as u16, m.row as u16), h).unwrap()
+        })
+        .collect::<HashMap<_, _>>();
 
     term.flush()?;
 
     let mut input = String::with_capacity(2); 
 
-    while map.len() > 1 {
-
+    loop {
         let next = term.next()?;
 
         // Check for ESC key
         if next == '\x1B' { return Ok(()) }
 
         input.push(next);
-        map.retain(|hint, _| hint.starts_with(&input));
+        hints.retain(|hint, _| hint.starts_with(&input));
 
+        // Check for match
+        if hints.len() <= 1 { break }
+
+        // Write out matching characters
         write!(&mut term, "{}", ansi::GREEN)?;
-
-        for (_, r#match) in map.iter() {
-            let go = ansi::Go(r#match.col as u16, r#match.row as u16);
-            write!(&mut term, "{}{}", go, input)?;
+        for (_, m) in &hints {
+            write!(&mut term, "{}{}", ansi::Go(m.col as u16, m.row as u16), input)?;
         }
-
         term.flush()?;
     }
 
-    if map.len() == 1 {
-        let (_, r#match) = map.into_iter()
-            .next()
-            .unwrap();
+    if hints.is_empty() { return Ok(()) }
 
-        let mut context: ClipboardContext = ClipboardProvider::new()?;
-        context.set_contents(r#match.txt.to_owned())?;
-    }
+    let (_, m) = hints.into_iter().next().unwrap();
+    let mut context: ClipboardContext = ClipboardProvider::new()?;
+    context.set_contents(m.txt.to_owned())?;
 
     Ok(())
 }
