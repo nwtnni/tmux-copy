@@ -23,7 +23,7 @@ pub fn active() -> Result<String, Box<dyn error::Error>> {
 }
 
 pub fn capture(pane: &str) -> Result<String, Box<dyn error::Error>> {
-    command!("tmux", "capture-pane", "-eJpt", pane)
+    command!("tmux", "capture-pane", "-Jpt", pane)
         .output()
         .map(|out| out.stdout)
         .map(String::from_utf8)?
