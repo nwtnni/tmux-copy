@@ -19,7 +19,10 @@ pub const SHOW: &str = "\x1B[?25h";
 pub const RESET: &str = "\x1B[39m";
 
 /// Set foreground color to red.
-pub const COLOR: &str = "\x1B[38;5;9m";
+pub const RED: &str = "\x1B[38;5;1m";
+
+/// Set foreground color to green.
+pub const GREEN: &str = "\x1B[38;5;2m";
 
 #[derive(Copy, Clone, Debug)]
 pub struct Go(pub u16, pub u16);

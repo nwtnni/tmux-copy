@@ -1,44 +1,13 @@
-macro_rules! cartesian {
-    (@inner) => {};
-    (@inner $head:expr, ($($tail:expr),*)) => {
-        [$(concat!($head, $tail)),*]
-    };
-    (@outer) => {};
-    (@outer $($iter:expr),* => $all:tt) => {
-        [$(cartesian!(@inner $iter, $all)),*]
-    };
-    ($($all:expr),+ $(,)?) => {
-        cartesian!(@outer $($all),+ => ($($all),+))
-    };
-}
+use crate::util;
 
 const SHORT: [&str; 10] = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"];
 const LONG: [[&str; 10]; 10] = cartesian!("a", "s", "d", "f", "g", "h", "j", "k", "l", ";");
 
-pub fn hints(count: usize) -> Or<Short, Long> {
+pub fn hints(count: usize) -> util::Or<Short, Long> {
     match count {
-    |  0 ..=  10 => Or::L(Short(0)),
-    | 10 ..= 100 => Or::R(Long(0)),
+    |  0 ..=  10 => util::Or::L(Short(0)),
+    | 10 ..= 100 => util::Or::R(Long(0)),
     | _ => unimplemented!(),
-    }
-}
-
-#[derive(Copy, Clone, Debug)]
-pub enum Or<L, R> {
-    L(L),
-    R(R),
-}
-
-impl<L, R, T> Iterator for Or<L, R>
-    where L: Iterator<Item = T>,
-          R: Iterator<Item = T>,
-{
-    type Item = T;
-    fn next(&mut self) -> Option<Self::Item> {
-        match self {
-        | Or::L(l) => l.next(),
-        | Or::R(r) => r.next(),
-        }
     }
 }
 

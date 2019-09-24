@@ -1,18 +1,6 @@
 use std::error;
 use std::process;
 
-macro_rules! command {
-    ($name:expr, $($arg:expr),* $(,)?) => {
-        {
-            let mut command = process::Command::new($name);
-            $(
-                command.arg($arg);
-            )*
-            command
-        }
-    }
-}
-
 pub fn active() -> Result<String, Box<dyn error::Error>> {
     command!("tmux", "list-panes", "-F", "#{?pane_active,#{pane_id},}")
         .output()
