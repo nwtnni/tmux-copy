@@ -12,9 +12,9 @@ lazy_static! {
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Match<'s> {
-    row: usize,
-    col: usize,
-    txt: &'s str,
+    pub row: usize,
+    pub col: usize,
+    pub txt: &'s str,
 }
 
 pub fn matches(text: &str) -> Vec<Match> {

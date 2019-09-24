@@ -1,3 +1,5 @@
+use std::fmt;
+
 /// Clear the screen.
 pub const CLEAR: &str = "\x1B[2J";
 
@@ -17,4 +19,14 @@ pub const SHOW: &str = "\x1B[?25h";
 pub const RESET: &str = "\x1B[39m";
 
 /// Set foreground color to red.
-pub const COLOR: &str = "\x1B[38;5;1";
+pub const COLOR: &str = "\x1B[38;5;9m";
+
+#[derive(Copy, Clone, Debug)]
+pub struct Go(pub u16, pub u16);
+
+impl fmt::Display for Go {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        // TODO: off-by-one?
+        write!(fmt, "\x1B[{};{}H", self.1, self.0 + 1)
+    }
+}

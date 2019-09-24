@@ -15,7 +15,7 @@ macro_rules! cartesian {
 const SHORT: [&str; 10] = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"];
 const LONG: [[&str; 10]; 10] = cartesian!("a", "s", "d", "f", "g", "h", "j", "k", "l", ";");
 
-pub fn hint(count: usize) -> impl Iterator<Item = &'static str> {
+pub fn hints(count: usize) -> Or<Short, Long> {
     match count {
     |  0 ..=  10 => Or::L(Short(0)),
     | 10 ..= 100 => Or::R(Long(0)),
@@ -23,7 +23,8 @@ pub fn hint(count: usize) -> impl Iterator<Item = &'static str> {
     }
 }
 
-enum Or<L, R> {
+#[derive(Copy, Clone, Debug)]
+pub enum Or<L, R> {
     L(L),
     R(R),
 }
@@ -41,7 +42,8 @@ impl<L, R, T> Iterator for Or<L, R>
     }
 }
 
-struct Short(usize);
+#[derive(Copy, Clone, Debug)]
+pub struct Short(usize);
 
 impl Iterator for Short {
     type Item = &'static str;
@@ -52,7 +54,8 @@ impl Iterator for Short {
     }
 }
 
-struct Long(usize);
+#[derive(Copy, Clone, Debug)]
+pub struct Long(usize);
 
 impl Iterator for Long {
     type Item = &'static str;
