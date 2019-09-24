@@ -2,6 +2,7 @@ use std::error;
 
 mod ansi;
 mod find;
+mod hint;
 mod term;
 mod tmux;
 
