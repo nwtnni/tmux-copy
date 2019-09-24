@@ -3,6 +3,9 @@ use std::mem;
 
 use crate::ansi;
 
+use std::io::Read;
+use std::io::Write;
+
 pub struct Term<'main> {
     termios: libc::termios,
     stdin: io::StdinLock<'main>,
@@ -46,8 +49,37 @@ impl<'main> Term<'main> {
         // Hold onto locks
         let stdin = stdin.lock();
         let mut stdout = stdout.lock();
-        use std::io::Write;
-        write!(stdout, "{}{}{}", ansi::ALTERNATE, ansi::HIDE, ansi::CLEAR)?;
+        write!(stdout, "{}{}{}", ansi::ALT, ansi::HIDE, ansi::CLEAR)?;
         Ok(Term { termios, stdin, stdout, buffer: [0] })
+    }
+
+    pub fn next(&mut self) -> io::Result<char> {
+        self.stdin.read_exact(&mut self.buffer)?;
+        Ok(self.buffer[0] as char)
+    }
+}
+
+impl<'main> io::Write for Term<'main> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.stdout.write(buf)
+    }
+    fn flush(&mut self) -> io::Result<()> {
+        self.stdout.flush()
+    }
+}
+
+impl<'main> Drop for Term<'main> {
+    /// Restore initial termios settings and clear the screen.
+    fn drop(&mut self) {
+        unsafe {
+            libc::tcsetattr(libc::STDIN_FILENO, libc::TCSANOW, &self.termios);
+            write!(
+                self.stdout,
+                "{}{}{}",
+                ansi::RESET,
+                ansi::SHOW,
+                ansi::MAIN,
+            ).ok();
+        }
     }
 }
