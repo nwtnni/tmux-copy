@@ -10,16 +10,29 @@ lazy_static! {
     static ref SET_RE: regex::RegexSet = regex::RegexSet::new(&[SHA, URL]).unwrap();
 }
 
-pub fn matches(text: &str) -> Vec<regex::Match> {
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct Match<'s> {
+    row: usize,
+    col: usize,
+    txt: &'s str,
+}
+
+pub fn matches(text: &str) -> Vec<Match> {
     let mut matches = Vec::new();
-    for line in text.split('\n') {
+    for (row, line) in text.split('\n').enumerate() {
         matches.extend(
             SET_RE.matches(text)
                 .iter()
                 .map(|index| ALL_RE[index])
-                .flat_map(|re| re.find_iter(line))
+                .flat_map(move |re| re.find_iter(line).map(move |r#match| {
+                    Match {
+                        row,
+                        col: r#match.start(),
+                        txt: r#match.as_str(),
+                    }
+                }))
         );
     }
-    matches.sort_by_key(|r#match| r#match.start());
+    matches.sort();
     matches
 }
