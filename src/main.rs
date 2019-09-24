@@ -1,6 +1,8 @@
 use std::error;
 
+mod ansi;
 mod find;
+mod term;
 mod tmux;
 
 fn main() -> Result<(), Box<dyn error::Error>> {
