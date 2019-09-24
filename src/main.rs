@@ -2,6 +2,8 @@ use std::collections::HashMap;
 use std::error;
 use std::io;
 
+use clipboard::*;
+
 #[macro_use]
 mod util;
 mod ansi;
@@ -58,9 +60,12 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     }
 
     if map.len() == 1 {
-        let r#match = map.into_iter()
+        let (_, r#match) = map.into_iter()
             .next()
             .unwrap();
+
+        let mut context: ClipboardContext = ClipboardProvider::new()?;
+        context.set_contents(r#match.txt.to_owned())?;
     }
 
     Ok(())
