@@ -11,10 +11,15 @@ lazy_static! {
 }
 
 pub fn matches(text: &str) -> Vec<regex::Match> {
+    let mut matches = Vec::new();
     for line in text.split('\n') {
-        for re in SET_RE.matches(text).iter().map(|index| ALL_RE[index]) {
-            // Individual scan
-        }
+        matches.extend(
+            SET_RE.matches(text)
+                .iter()
+                .map(|index| ALL_RE[index])
+                .flat_map(|re| re.find_iter(line))
+        );
     }
-    unimplemented!()
+    matches.sort_by_key(|r#match| r#match.start());
+    matches
 }
