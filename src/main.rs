@@ -1,30 +1,40 @@
 use std::collections::HashMap;
 use std::error;
+use std::env;
+use std::fs;
 use std::io;
+use std::io::Write;
 
 use clipboard::*;
 
-#[macro_use]
-mod util;
-mod ansi;
-mod find;
-mod hint;
-mod term;
-mod tmux;
+use tmux_copy::ansi;
+use tmux_copy::find;
+use tmux_copy::hint;
+use tmux_copy::term;
+use tmux_copy::tmux;
 
-use std::io::Write;
+struct Bomb<'pane>(&'pane str);
+
+impl<'pane> Drop for Bomb<'pane> {
+    fn drop(&mut self) {
+        tmux::swap(None, &self.0).ok();
+    }
+}
 
 fn main() -> Result<(), Box<dyn error::Error>> {
-    let pane = tmux::active()?;
+
+    let pane = env::args().nth(1).expect("Expected active pane");
     let text = tmux::capture(&pane)?;
+    let trum = text.trim_end();
+    let bomb = Bomb(&pane);
 
     let mut stdin = io::stdin();
     let mut stdout = io::stdout();
     let mut term = term::Term::new(&mut stdin, &mut stdout)?;
 
-    let matches = find::matches(&text);
+    let matches = find::matches(&trum);
 
-    write!(&mut term, "{}{}", text, ansi::RED)?;
+    write!(&mut term, "{}{}", trum, ansi::RED)?;
 
     let mut hints = hint::hints(matches.len())
         .zip(&matches)
@@ -63,5 +73,6 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let mut context: ClipboardContext = ClipboardProvider::new()?;
     context.set_contents(m.txt.to_owned())?;
 
+    drop(bomb);
     Ok(())
 }

@@ -30,6 +30,6 @@ pub struct Go(pub u16, pub u16);
 impl fmt::Display for Go {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         // TODO: off-by-one?
-        write!(fmt, "\x1B[{};{}H", self.1, self.0 + 1)
+        write!(fmt, "\x1B[{};{}H", self.1 + 1, self.0 + 1)
     }
 }

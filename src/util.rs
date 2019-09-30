@@ -40,4 +40,3 @@ impl<L, R, T> Iterator for Or<L, R>
         }
     }
 }
-
