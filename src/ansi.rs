@@ -1,5 +1,7 @@
 use std::fmt;
 
+use crate::find;
+
 /// Clear the screen.
 pub const CLEAR: &str = "\x1B[2J";
 
@@ -18,11 +20,8 @@ pub const RED: &str = "\x1B[38;5;9m";
 /// Set foreground color to green.
 pub const GREEN: &str = "\x1B[38;5;10m";
 
-#[derive(Copy, Clone, Debug)]
-pub struct Go(pub u16, pub u16);
-
-impl fmt::Display for Go {
+impl<'s> fmt::Display for find::Match<'s> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
-        write!(fmt, "\x1B[{};{}H", self.1 + 1, self.0 + 1)
+        write!(fmt, "\x1B[{};{}H", self.row + 1, self.col + 1)
     }
 }

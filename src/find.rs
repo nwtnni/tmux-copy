@@ -20,8 +20,8 @@ lazy_static! {
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Match<'s> {
-    pub row: usize,
-    pub col: usize,
+    pub row: u16,
+    pub col: u16,
     pub txt: &'s str,
 }
 
@@ -34,8 +34,8 @@ pub fn matches(text: &str) -> Vec<Match> {
                 .map(|index| ALL_RE[index])
                 .flat_map(move |re| re.find_iter(line).map(move |r#match| {
                     Match {
-                        row,
-                        col: r#match.start(),
+                        row: row as u16,
+                        col: r#match.start() as u16,
                         txt: r#match.as_str(),
                     }
                 }))

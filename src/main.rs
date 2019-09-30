@@ -38,7 +38,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let mut hints = hint::hints(matches.len())
         .zip(&matches)
         .inspect(|(h, m)| {
-            write!(&mut term, "{}{}", ansi::Go(m.col as u16, m.row as u16), h).unwrap()
+            write!(&mut term, "{}{}", m, h).unwrap()
         })
         .collect::<HashMap<_, _>>();
 
@@ -61,7 +61,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
         // Write out matching characters
         write!(&mut term, "{}", ansi::GREEN)?;
         for (_, m) in &hints {
-            write!(&mut term, "{}{}", ansi::Go(m.col as u16, m.row as u16), input)?;
+            write!(&mut term, "{}{}", m, input)?;
         }
         term.flush()?;
     }
