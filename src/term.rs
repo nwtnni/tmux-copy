@@ -73,12 +73,7 @@ impl<'main> Drop for Term<'main> {
     fn drop(&mut self) {
         unsafe {
             libc::tcsetattr(libc::STDIN_FILENO, libc::TCSANOW, &self.termios);
-            write!(
-                self.stdout,
-                "{}{}",
-                ansi::RESET,
-                ansi::SHOW,
-            ).ok();
+            write!(self.stdout, "{}{}", ansi::RESET, ansi::SHOW).ok();
             self.stdout.flush().ok();
         }
     }
