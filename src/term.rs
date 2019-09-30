@@ -9,7 +9,7 @@ use std::io::Write;
 pub struct Term<'main> {
     termios: libc::termios,
     stdin: io::StdinLock<'main>,
-    stdout: io::StdoutLock<'main>,
+    stdout: io::BufWriter<io::StdoutLock<'main>>,
     buffer: [u8; 1],
 }
 
@@ -48,7 +48,7 @@ impl<'main> Term<'main> {
 
         // Hold onto locks
         let stdin = stdin.lock();
-        let mut stdout = stdout.lock();
+        let mut stdout = io::BufWriter::new(stdout.lock());
         write!(stdout, "{}{}", ansi::HIDE, ansi::CLEAR)?;
         Ok(Term { termios, stdin, stdout, buffer: [0] })
     }
@@ -79,6 +79,7 @@ impl<'main> Drop for Term<'main> {
                 ansi::RESET,
                 ansi::SHOW,
             ).ok();
+            self.stdout.flush().ok();
         }
     }
 }
