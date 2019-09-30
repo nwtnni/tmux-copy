@@ -1,13 +1,15 @@
 use lazy_static::lazy_static;
 
+const PATH: &str = r"/?(?:(?:[[:word:]]|-|~|\.)+/)+(?:[[:word:]]|-|~|\.)*";
 const SHA: &str = r"[0-9a-f]{7, 40}";
 const URL: &str = r"(?:https?://|git@|git://|ssh://|ftp://|file://)[^ ]+";
 
 lazy_static! {
+    static ref PATH_RE: regex::Regex = regex::Regex::new(PATH).unwrap();
     static ref SHA_RE: regex::Regex = regex::Regex::new(SHA).unwrap();
     static ref URL_RE: regex::Regex = regex::Regex::new(URL).unwrap();
-    static ref ALL_RE: [&'static regex::Regex; 2] = [&*SHA_RE, &*URL_RE];
-    static ref SET_RE: regex::RegexSet = regex::RegexSet::new(&[SHA, URL]).unwrap();
+    static ref ALL_RE: [&'static regex::Regex; 3] = [&*PATH_RE, &*SHA_RE, &*URL_RE];
+    static ref SET_RE: regex::RegexSet = regex::RegexSet::new(&[PATH, SHA, URL]).unwrap();
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
