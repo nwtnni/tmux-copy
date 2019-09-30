@@ -9,8 +9,14 @@ pub fn active() -> Result<String, io::Error> {
         .map(stdout)
 }
 
-pub fn capture(pane: &str) -> Result<String, io::Error> {
+pub fn capture_text(pane: &str) -> Result<String, io::Error> {
     command!("tmux", "capture-pane", "-pt", pane.trim())
+        .output()
+        .map(stdout)
+}
+
+pub fn capture_all(pane: &str) -> Result<String, io::Error> {
+    command!("tmux", "capture-pane", "-ept", pane.trim())
         .output()
         .map(stdout)
 }

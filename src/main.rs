@@ -23,7 +23,8 @@ impl<'pane> Drop for Bomb<'pane> {
 fn main() -> Result<(), Box<dyn error::Error>> {
 
     let pane = env::args().nth(1).expect("Expected active pane");
-    let text = tmux::capture(&pane)?;
+    let text = tmux::capture_text(&pane)?;
+    let show = tmux::capture_all(&pane)?;
     let trum = text.trim_end();
     let bomb = Bomb(&pane);
 
@@ -33,7 +34,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 
     let matches = find::matches(&trum);
 
-    write!(&mut term, "{}{}", trum, ansi::RED)?;
+    write!(&mut term, "{}{}", show.trim_end(), ansi::RED)?;
 
     let mut hints = hint::hints(matches.len())
         .zip(&matches)
@@ -47,12 +48,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let mut input = String::with_capacity(2); 
 
     loop {
-        let next = term.next()?;
-
-        // Check for ESC key
-        if next == '\x1B' { return Ok(()) }
-
-        input.push(next);
+        input.push(term.next()?);
         hints.retain(|hint, _| hint.starts_with(&input));
 
         // Check for match
@@ -68,6 +64,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 
     if hints.is_empty() { return Ok(()) }
 
+    // Copy into system clipboard
     let (_, m) = hints.into_iter().next().unwrap();
     let mut context: ClipboardContext = ClipboardProvider::new()?;
     context.set_contents(m.txt.to_owned())?;

@@ -15,10 +15,10 @@ pub const SHOW: &str = "\x1B[?25h";
 pub const RESET: &str = "\x1B[39m";
 
 /// Set foreground color to red.
-pub const RED: &str = "\x1B[38;5;9m";
+pub const RED: &str = "\x1B[38;5;1m";
 
 /// Set foreground color to green.
-pub const GREEN: &str = "\x1B[38;5;10m";
+pub const GREEN: &str = "\x1B[38;5;2m";
 
 impl<'s> fmt::Display for find::Match<'s> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
