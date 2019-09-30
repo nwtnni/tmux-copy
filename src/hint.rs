@@ -1,12 +1,12 @@
 use crate::util;
 
-const SHORT: [&str; 10] = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";"];
-const LONG: [[&str; 10]; 10] = cartesian!("a", "s", "d", "f", "g", "h", "j", "k", "l", ";");
+const SHORT: [&str; 20] = ["a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p"];
+const LONG: [[&str; 20]; 20] = cartesian!("a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p");
 
 pub fn hints(count: usize) -> util::Or<Short, Long> {
     match count {
-    |  0 ..=  10 => util::Or::L(Short(0)),
-    | 10 ..= 100 => util::Or::R(Long(0)),
+    |  0 ..=  20 => util::Or::L(Short(0)),
+    | 20 ..= 400 => util::Or::R(Long(0)),
     | _ => unimplemented!(),
     }
 }
@@ -29,7 +29,7 @@ pub struct Long(usize);
 impl Iterator for Long {
     type Item = &'static str;
     fn next(&mut self) -> Option<Self::Item> {
-        let next = &LONG[self.0 / 10][self.0 % 10];
+        let next = &LONG[self.0 / 20][self.0 % 20];
         self.0 += 1;
         Some(next)
     }

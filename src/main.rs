@@ -20,55 +20,50 @@ impl<'pane> Drop for Bomb<'pane> {
     }
 }
 
+/// Color of matching text
+const FULL: ansi::Color = ansi::Color(6);
+
+/// Color of unselected hint
+const HINT: ansi::Color = ansi::Color(10);
+
+/// Color of selected hint
+const PICK: ansi::Color = ansi::Color(11);
+
 fn main() -> Result<(), Box<dyn error::Error>> {
 
     let pane = env::args().nth(1).expect("Expected active pane");
+    let bomb = Bomb(&pane);
     let text = tmux::capture_text(&pane)?;
     let show = tmux::capture_all(&pane)?;
-    let trum = text.trim_end();
-    let bomb = Bomb(&pane);
 
     let mut stdin = io::stdin();
     let mut stdout = io::stdout();
     let mut term = term::Term::new(&mut stdin, &mut stdout)?;
 
-    let matches = find::matches(&trum);
-
-    write!(&mut term, "{}{}", show.trim_end(), ansi::RED)?;
-
+    let matches = find::matches(&text.trim_end());
     let mut hints = hint::hints(matches.len())
         .zip(&matches)
-        .inspect(|(h, m)| {
-            write!(&mut term, "{}{}", m, h).unwrap()
-        })
         .collect::<HashMap<_, _>>();
 
+    // Write out original text, matches, and hints
+    write!(&mut term, "{}", show.trim_end())?;
+    hints.iter().try_for_each(|(h, m)| {
+        write!(&mut term, "{}{}{}", m, FULL, m.txt)?;
+        write!(&mut term, "{}{}{}", m, HINT, h)
+    })?;
     term.flush()?;
 
     let mut input = String::with_capacity(2); 
-
-    loop {
+    while hints.len() > 1 {
         input.push(term.next()?);
         hints.retain(|hint, _| hint.starts_with(&input));
-
-        // Check for match
-        if hints.len() <= 1 { break }
-
-        // Write out matching characters
-        write!(&mut term, "{}", ansi::GREEN)?;
-        for (_, m) in &hints {
-            write!(&mut term, "{}{}", m, input)?;
-        }
+        hints.iter().try_for_each(|(_, m)| write!(&mut term, "{}{}{}", m, PICK, input))?;
         term.flush()?;
     }
 
-    if hints.is_empty() { return Ok(()) }
+    if let Some((_, m)) = hints.into_iter().next() {
+        ClipboardContext::new()?.set_contents(m.txt.into())?;
+    }
 
-    // Copy into system clipboard
-    let (_, m) = hints.into_iter().next().unwrap();
-    let mut context: ClipboardContext = ClipboardProvider::new()?;
-    context.set_contents(m.txt.to_owned())?;
-
-    drop(bomb);
-    Ok(())
+    Ok(drop(bomb))
 }

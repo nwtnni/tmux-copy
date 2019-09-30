@@ -14,11 +14,14 @@ pub const SHOW: &str = "\x1B[?25h";
 /// Reset foreground style.
 pub const RESET: &str = "\x1B[39m";
 
-/// Set foreground color to red.
-pub const RED: &str = "\x1B[38;5;1m";
+#[derive(Copy, Clone, Debug)]
+pub struct Color(pub u8);
 
-/// Set foreground color to green.
-pub const GREEN: &str = "\x1B[38;5;2m";
+impl fmt::Display for Color {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "\x1b[38;5;{}m", self.0)
+    }
+}
 
 impl<'s> fmt::Display for find::Match<'s> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
