@@ -1,4 +1,3 @@
-use std::env;
 use std::io;
 use std::process;
 

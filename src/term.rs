@@ -49,7 +49,7 @@ impl<'main> Term<'main> {
         // Hold onto locks
         let stdin = stdin.lock();
         let mut stdout = stdout.lock();
-        write!(stdout, "{}{}{}", ansi::ALT, ansi::HIDE, ansi::CLEAR)?;
+        write!(stdout, "{}{}", ansi::HIDE, ansi::CLEAR)?;
         Ok(Term { termios, stdin, stdout, buffer: [0] })
     }
 
@@ -75,10 +75,9 @@ impl<'main> Drop for Term<'main> {
             libc::tcsetattr(libc::STDIN_FILENO, libc::TCSANOW, &self.termios);
             write!(
                 self.stdout,
-                "{}{}{}",
+                "{}{}",
                 ansi::RESET,
                 ansi::SHOW,
-                ansi::MAIN,
             ).ok();
         }
     }
