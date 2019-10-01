@@ -38,14 +38,12 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let sock = net::UnixDatagram::unbound()?;
     let bomb = Bomb(&pane);
 
-    let text = tmux::capture_text(&pane)?;
-    let show = tmux::capture_all(&pane)?;
-
     let mut stdin = io::stdin();
     let mut stdout = io::stdout();
     let mut term = term::Term::new(&mut stdin, &mut stdout)?;
 
-    let matches = find::matches(&text.trim_end());
+    let capture = tmux::capture(&pane)?;
+    let matches = find::matches(capture.trim_end());
 
     // Short-circuit
     if matches.is_empty() {
@@ -58,7 +56,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
         .collect::<Vec<_>>();
 
     // Write out original text, matches, and hints
-    write!(&mut term, "{}", show.trim_end())?;
+    tmux::render(&pane, &mut term)?;
     for (h, m) in &hints {
         write!(&mut term, "{}{}{}{}{}{}", m, FULL, m.txt, m, HINT, h)?;
     }
