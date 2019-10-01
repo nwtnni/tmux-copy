@@ -2,6 +2,7 @@ use std::error;
 use std::env;
 use std::io;
 use std::io::Write;
+use std::net;
 
 use clipboard::*;
 
@@ -30,8 +31,12 @@ const PICK: ansi::Color = ansi::Color(11);
 
 fn main() -> Result<(), Box<dyn error::Error>> {
 
-    let pane = env::args().nth(1).expect("Expected active pane");
+    let mut args = env::args().skip(1);
+
+    let pane = args.next().expect("Missing active pane");
+    let port = args.next().expect("Missing port").parse::<u16>()?;
     let bomb = Bomb(&pane);
+
     let text = tmux::capture_text(&pane)?;
     let show = tmux::capture_all(&pane)?;
 
@@ -51,6 +56,10 @@ fn main() -> Result<(), Box<dyn error::Error>> {
         write!(&mut term, "{}{}{}", m, HINT, h)?;
     }
     term.flush()?;
+
+    // Signal to swap panes
+    net::TcpStream::connect(("127.0.0.1", port))?
+        .shutdown(net::Shutdown::Both)?;
 
     let mut input = String::with_capacity(2); 
     while hints.len() > 1 {

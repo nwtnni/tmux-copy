@@ -1,4 +1,5 @@
 use std::io;
+use std::net;
 use std::process;
 
 const WINDOW_NAME: &str = "[tmux-copy]";
@@ -21,20 +22,18 @@ pub fn capture_all(pane: &str) -> Result<String, io::Error> {
         .map(stdout)
 }
 
-pub fn spawn(active: &str) -> Result<String, io::Error> {
-    command!("tmux", "new-window", "-dn", WINDOW_NAME, format!("target/release/main {}", active.trim()))
+pub fn spawn(pane: &str, addr: &net::SocketAddr) -> Result<String, io::Error> {
+    let main = format!("target/release/main {} {}", pane.trim(), addr.port());
+    command!("tmux", "new-window", "-dn", WINDOW_NAME, main)
         .spawn()?
         .wait()
         .map(drop)?;
-
     let panes = command!("tmux", "list-panes", "-aF", r"#W #D")
         .output()
         .map(stdout)?;
-
     let pane = panes.split('\n')
         .find(|id| id.starts_with(WINDOW_NAME))
         .expect("Pane was never created");
-
     Ok(
         pane.split(' ')
             .nth(1)
