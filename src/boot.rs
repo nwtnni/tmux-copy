@@ -22,10 +22,9 @@ fn main() -> Result<(), io::Error> {
     let to = tmux::spawn(&from, &path)?;
     let mut buffer = [0; 1];
     let _ = sock.recv(&mut buffer)?;
-    if buffer[0] == 0 {
-        tmux::swap(Some(&from), &to)?;
-    } else {
-        println!("No matches found.")
+    match buffer[0] {
+    | 0 => tmux::swap(Some(&from), &to)?,
+    | _ => println!("No matches found."),
     }
     Ok(drop(bomb))
 }
