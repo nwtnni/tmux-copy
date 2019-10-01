@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::error;
 use std::env;
 use std::io;
@@ -43,20 +42,20 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let matches = find::matches(&text.trim_end());
     let mut hints = hint::hints(matches.len())
         .zip(&matches)
-        .collect::<HashMap<_, _>>();
+        .collect::<Vec<_>>();
 
     // Write out original text, matches, and hints
     write!(&mut term, "{}", show.trim_end())?;
-    hints.iter().try_for_each(|(h, m)| {
+    for (h, m) in &hints {
         write!(&mut term, "{}{}{}", m, FULL, m.txt)?;
-        write!(&mut term, "{}{}{}", m, HINT, h)
-    })?;
+        write!(&mut term, "{}{}{}", m, HINT, h)?;
+    }
     term.flush()?;
 
     let mut input = String::with_capacity(2); 
     while hints.len() > 1 {
         input.push(term.next()?);
-        hints.retain(|hint, _| hint.starts_with(&input));
+        hints.retain(|(h, _)| h.starts_with(&input));
         hints.iter().try_for_each(|(_, m)| write!(&mut term, "{}{}{}", m, PICK, input))?;
         term.flush()?;
     }
