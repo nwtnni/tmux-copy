@@ -2,8 +2,6 @@ use std::io;
 use std::path;
 use std::process;
 
-const WINDOW_NAME: &str = "[tmux-copy]";
-
 pub fn active() -> Result<String, io::Error> {
     command!("tmux", "list-panes", "-F", "#{?#{&&:#{pane_active},#{window_active}},#{pane_id},}")
         .output()
@@ -26,14 +24,14 @@ pub fn render<W: io::Write>(pane: &str, mut to: W) -> Result<(), io::Error> {
         })
 }
 
-pub fn spawn<P: AsRef<path::Path>>(pane: &str, addr: P) -> Result<String, io::Error> {
+pub fn spawn<P: AsRef<path::Path>>(pane: &str, uuid: &str, addr: P) -> Result<String, io::Error> {
     let main = format!(
         "target/release/main {} {}",
         pane.trim(),
         addr.as_ref().display()
     );
 
-    command!("tmux", "new-window", "-dn", WINDOW_NAME, main)
+    command!("tmux", "new-window", "-dn", uuid, main)
         .spawn()?
         .wait()
         .map(drop)?;
@@ -43,7 +41,7 @@ pub fn spawn<P: AsRef<path::Path>>(pane: &str, addr: P) -> Result<String, io::Er
         .map(stdout)?;
 
     let pane = panes.split('\n')
-        .find(|id| id.starts_with(WINDOW_NAME))
+        .find(|id| id.starts_with(uuid))
         .expect("Pane was never created");
 
     Ok(
