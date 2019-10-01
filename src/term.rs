@@ -13,12 +13,6 @@ pub struct Term<'main> {
     buffer: [u8; 1],
 }
 
-macro_rules! test {
-    ($call:expr) => {
-        if $call != 0 { return Err(io::Error::last_os_error()) }
-    }
-}
-
 impl<'main> Term<'main> {
 
     pub fn new(stdin: &'main mut io::Stdin, stdout: &'main mut io::Stdout) -> io::Result<Self> {

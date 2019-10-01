@@ -22,6 +22,12 @@ macro_rules! command {
     }
 }
 
+macro_rules! test {
+    ($call:expr) => {
+        if $call != 0 { return Err(io::Error::last_os_error()) }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 pub enum Or<L, R> {
     L(L),
