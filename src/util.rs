@@ -1,9 +1,7 @@
 macro_rules! cartesian {
-    (@inner) => {};
     (@inner $head:expr, ($($tail:expr),*)) => {
         [$(concat!($head, $tail)),*]
     };
-    (@outer) => {};
     (@outer $($iter:expr),* => $all:tt) => {
         [$(cartesian!(@inner $iter, $all)),*]
     };
