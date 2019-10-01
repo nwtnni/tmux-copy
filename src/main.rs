@@ -34,9 +34,9 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let mut args = env::args().skip(1);
 
     let pane = args.next().expect("Missing active pane");
+    let bomb = Bomb(&pane);
     let path = args.next().expect("Missing socket path");
     let sock = net::UnixDatagram::unbound()?;
-    let bomb = Bomb(&pane);
 
     let mut stdin = io::stdin();
     let mut stdout = io::stdout();
