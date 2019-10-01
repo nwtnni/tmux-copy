@@ -15,7 +15,9 @@ impl<'path> Drop for Bomb<'path> {
 }
 
 fn main() -> Result<(), io::Error> {
-    let path = env::temp_dir().join("tmux-copy");
+    let uuid = uuid::Uuid::new_v4().to_simple();
+    let file = format!("tmux-copy-{}", uuid);
+    let path = env::temp_dir().join(file);
     let bomb = Bomb(&path);
     let sock = net::UnixDatagram::bind(&path)?;
     let from = tmux::active()?;
