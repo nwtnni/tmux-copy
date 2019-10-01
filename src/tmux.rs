@@ -5,7 +5,7 @@ use std::process;
 const WINDOW_NAME: &str = "[tmux-copy]";
 
 pub fn active() -> Result<String, io::Error> {
-    command!("tmux", "list-panes", "-F", "#{?pane_active,#{pane_id},}")
+    command!("tmux", "list-panes", "-F", "#{?#{&&:#{pane_active},#{window_active}},#{pane_id},}")
         .output()
         .map(stdout)
 }
