@@ -14,10 +14,10 @@ macro_rules! regex_set {
 regex_set! {
     IPV4: r"[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}";
     IPV6: r"[[:xdigit:]]+:+[[:xdigit:]]+[^[[:space:]]]+";
-    PATH: r"/?(?:(?:[[:word:]]|-|~|\.)+/)+(?:[[:word:]]|-|~|\.)*";
+    PATH: r"/?([[[:word:]]-~\.]+/)+[[[:word:]]-\.]*";
     SHA:  r"[[:xdigit:]]{7, 40}";
     UID:  r"[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}";
-    URL:  r"(?:https?://|git@|git://|ssh://|ftp://|file://)[^[[:space:]]]+";
+    URL:  r#"(?:https?://|git@|git://|ssh://|ftp://|file://)[^'"\]\)[[:space:]]]+"#;
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
