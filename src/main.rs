@@ -34,7 +34,6 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let mut args = env::args().skip(1);
 
     let pane = args.next().expect("Missing active pane");
-    let bomb = Bomb(&pane);
     let path = args.next().expect("Missing socket path");
     let sock = net::UnixDatagram::unbound()?;
 
@@ -64,6 +63,9 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 
     // Signal OK to swap
     sock.send_to(&[0], &path)?;
+    
+    // Ensure that we swap back
+    let bomb = Bomb(&pane);
 
     let mut input = String::with_capacity(2); 
     loop {
