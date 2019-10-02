@@ -12,6 +12,7 @@ use tmux_copy::hint;
 use tmux_copy::term;
 use tmux_copy::tmux;
 
+/// Destructor swaps back to original `tmux` pane.
 struct Bomb<'pane>(&'pane str);
 
 impl<'pane> Drop for Bomb<'pane> {
@@ -31,20 +32,22 @@ const PICK: ansi::Color = ansi::Color(11);
 
 fn main() -> Result<(), Box<dyn error::Error>> {
 
+    // Retrieve active pane ID and socket path from arguments
     let mut args = env::args().skip(1);
-
     let pane = args.next().expect("Missing active pane");
     let path = args.next().expect("Missing socket path");
-    let sock = net::UnixDatagram::unbound()?;
 
+    // Set up I/O
     let mut stdin = io::stdin();
     let mut stdout = io::stdout();
     let mut term = term::Term::new(&mut stdin, &mut stdout)?;
+    let sock = net::UnixDatagram::unbound()?;
 
+    // Search for matches
     let capture = tmux::capture(&pane)?;
     let matches = find::matches(&capture);
 
-    // Short-circuit
+    // Short-circuit without swapping if there are no matches
     if matches.is_empty() {
         sock.send_to(&[1], &path)?;
         return Ok(())
@@ -61,12 +64,13 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     }
     term.flush()?;
 
-    // Signal OK to swap
+    // Signal `boot` binary that we're ready for swap
     sock.send_to(&[0], &path)?;
     
     // Ensure that we swap back
     let bomb = Bomb(&pane);
 
+    // Blocking reads for user input
     let mut input = String::with_capacity(2); 
     loop {
         input.push(term.next()?);
@@ -76,6 +80,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
         term.flush()?;
     }
 
+    // Copy selected text
     if let Some((_, m)) = hints.into_iter().next() {
         ClipboardContext::new()?.set_contents(m.txt.into())?;
     }
