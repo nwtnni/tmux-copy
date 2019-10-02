@@ -42,7 +42,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let mut term = term::Term::new(&mut stdin, &mut stdout)?;
 
     let capture = tmux::capture(&pane)?;
-    let matches = find::matches(capture.trim_end());
+    let matches = find::matches(&capture);
 
     // Short-circuit
     if matches.is_empty() {

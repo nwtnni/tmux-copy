@@ -21,7 +21,7 @@ fn main() -> Result<(), io::Error> {
     let bomb = Bomb(&path);
     let sock = net::UnixDatagram::bind(&path)?;
     let from = tmux::active()?;
-    let to = tmux::spawn(&from, &uuid.to_string(), &path)?;
+    let to = tmux::spawn(&from, &path, &uuid.to_string())?;
     let mut buffer = [0; 1];
     let _ = sock.recv(&mut buffer)?;
     match buffer[0] {
