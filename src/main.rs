@@ -2,7 +2,6 @@ use std::error;
 use std::env;
 use std::io;
 use std::io::Write;
-use std::os::unix::net;
 
 use clipboard::*;
 
@@ -17,7 +16,7 @@ struct Bomb<'pane>(&'pane str);
 
 impl<'pane> Drop for Bomb<'pane> {
     fn drop(&mut self) {
-        tmux::swap(None, &self.0).ok();
+        tmux::swap(&self.0).ok();
     }
 }
 
@@ -35,13 +34,11 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     // Retrieve active pane ID and socket path from arguments
     let mut args = env::args().skip(1);
     let pane = args.next().expect("Missing active pane");
-    let path = args.next().expect("Missing socket path");
 
     // Set up I/O
     let mut stdin = io::stdin();
     let mut stdout = io::stdout();
     let mut term = term::Term::new(&mut stdin, &mut stdout)?;
-    let sock = net::UnixDatagram::unbound()?;
 
     // Search for matches
     let capture = tmux::capture(&pane)?;
@@ -49,7 +46,6 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 
     // Short-circuit without swapping if there are no matches
     if matches.is_empty() {
-        sock.send_to(&[1], &path)?;
         return Ok(())
     }
 
@@ -64,8 +60,8 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     }
     term.flush()?;
 
-    // Signal `boot` binary that we're ready for swap
-    sock.send_to(&[0], &path)?;
+    // Swap with active pane
+    tmux::swap(&pane)?;
     
     // Ensure that we swap back
     let bomb = Bomb(&pane);
