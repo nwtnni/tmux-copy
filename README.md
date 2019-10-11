@@ -11,8 +11,7 @@ on [rust-clipboard][cb] for system clipboard support.
 
 ## Installation
 
-Requires [Rust][rust] to compile the binaries, and [tpm][tpm]
-(`tmux` Plugin Manager) to manage the `tmux` configuration.
+Requires [Rust][rust] to compile the binaries, and [tpm][tpm] to manage the `tmux` installation.
 
 - Add `set -g @plugin 'nwtnni/tmux-copy'` to your `.tmux.conf`
 - Install with `<PREFIX>-I`
@@ -22,41 +21,28 @@ Requires [Rust][rust] to compile the binaries, and [tpm][tpm]
 ## Known Issues
 
 - Not very configurable
-
 - Requires Rust compiler to build binaries from source
-
 - Doesn't support zoomed `tmux` panes
-
 - Doesn't support scrolled `tmux` panes
-
 - Doesn't handle Unicode: matches will be offset
-
 - Allows overlapping matches
-
-- Only supports up to 400 simultaneous hints
 
 ## Configuration
 
 - Regular expressions defined in [find][find]
-
 - Matching colors defined in [main][main]
-
 - Hint strings defined in [hint][hint]
-
 - Key binding (`<PREFIX>-f`) defined in [tmux-copy.tmux][tc]
 
 ## Performance
 
 - Uses [regex][re] as the underlying search engine
-
 - Scans each line once with a [RegexSet][rs] to determine if any specific
   regular expression matches. Scans again for each regular expression that
   matches at least once in the line. Assuming matches are sparse, we'll
   only scan each line a single time independently of how many specific
   regular expressions there are.
-
 - Generates hint strings at compile time using a [fun macro][ct]
-
 - Minimizes calls to `tmux`
 
 [ct]: https://github.com/nwtnni/tmux-copy/blob/8fd1d3340f4628b45cf8998141db9bce69f9e715/src/util.rs#L1-L11
