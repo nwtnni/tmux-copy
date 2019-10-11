@@ -24,7 +24,6 @@ Requires [Rust][rust] to compile the binaries, and [tpm][tpm] to manage the `tmu
 - Requires Rust compiler to build binaries from source
 - Doesn't support zoomed `tmux` panes
 - Doesn't support scrolled `tmux` panes
-- Doesn't handle Unicode: matches will be offset
 - Allows overlapping matches
 
 ## "Configuration"

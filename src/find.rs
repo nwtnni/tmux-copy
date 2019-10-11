@@ -38,7 +38,7 @@ pub fn matches(text: &str) -> Vec<Match> {
                 .flat_map(move |re| re.find_iter(line).map(move |r#match| {
                     Match {
                         row: row as u16,
-                        col: r#match.start() as u16,
+                        col: column(line, r#match.start()) as u16,
                         txt: r#match.as_str(),
                     }
                 }))
@@ -46,4 +46,17 @@ pub fn matches(text: &str) -> Vec<Match> {
     }
     matches.sort();
     matches
+}
+
+fn column(line: &str, index: usize) -> usize {
+    if line.is_ascii() {
+        return index
+    }
+    line.char_indices()
+        .enumerate()
+        .find(|(_, (idx, _))| {
+            *idx == index
+        })
+        .map(|(col, _)| col)
+        .unwrap()
 }
