@@ -20,6 +20,14 @@ fn active() -> Result<String, io::Error> {
         .map(stdout)
 }
 
+/// Display `message` in the status line.
+pub fn display(message: &str) -> Result<(), io::Error> {
+    command!("tmux", "display-message", message)
+        .spawn()?
+        .wait()
+        .map(drop)
+}
+
 /// Get the plain-text contents of `pane`.
 pub fn capture(pane: &str) -> Result<String, io::Error> {
     command!("tmux", "capture-pane", "-pt", pane.trim())

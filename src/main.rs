@@ -46,6 +46,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 
     // Short-circuit without swapping if there are no matches
     if matches.is_empty() {
+        tmux::display("No matches found.")?;
         return Ok(())
     }
 
