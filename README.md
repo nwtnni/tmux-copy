@@ -27,7 +27,7 @@ Requires [Rust][rust] to compile the binaries, and [tpm][tpm] to manage the `tmu
 - Doesn't handle Unicode: matches will be offset
 - Allows overlapping matches
 
-## Configuration
+## "Configuration"
 
 - Regular expressions defined in [find][find]
 - Matching colors defined in [main][main]
