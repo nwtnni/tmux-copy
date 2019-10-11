@@ -1,3 +1,5 @@
+use std::cell;
+
 macro_rules! cartesian {
     (@inner $head:expr, ($($tail:expr),*)) => {
         [$(concat!($head, $tail)),*]
@@ -50,6 +52,30 @@ impl<L, R, T> Iterator for Or<L, R>
         match self {
         | Or::L(l) => l.next(),
         | Or::R(r) => r.next(),
+        }
+    }
+}
+
+pub struct Lazy<T: Copy, F: Fn() -> T> {
+    thunk: F,
+    value: cell::Cell<Option<T>>,
+}
+
+impl<T: Copy, F: Fn() -> T> Lazy<T, F> {
+    pub fn new(thunk: F) -> Self {
+        Lazy {
+            thunk,
+            value: cell::Cell::new(None),
+        }
+    }
+
+    pub fn force(&self) -> T {
+        match self.value.get() {
+        | Some(value) => value,
+        | None => {
+            self.value.set(Some((self.thunk)()));
+            self.force()
+        }
         }
     }
 }

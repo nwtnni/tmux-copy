@@ -1,3 +1,5 @@
+use crate::util;
+
 macro_rules! regex_set {
     ($($name:ident: $regex:expr);* $(;)?) => {
         paste::item! {
@@ -31,14 +33,16 @@ pub struct Match<'s> {
 pub fn matches(text: &str) -> Vec<Match> {
     let mut matches = Vec::new();
     for (row, line) in text.split('\n').enumerate() {
+        let ascii = &util::Lazy::new(|| line.is_ascii());
         matches.extend(
             SET_RE.matches(text)
                 .iter()
                 .map(|index| ALL_RE[index])
                 .flat_map(move |re| re.find_iter(line).map(move |r#match| {
+                    let start = r#match.start();
                     Match {
                         row: row as u16,
-                        col: column(line, r#match.start()) as u16,
+                        col: if ascii.force() { start } else { column(line, start) } as u16,
                         txt: r#match.as_str(),
                     }
                 }))
@@ -49,9 +53,6 @@ pub fn matches(text: &str) -> Vec<Match> {
 }
 
 fn column(line: &str, index: usize) -> usize {
-    if line.is_ascii() {
-        return index
-    }
     line.char_indices()
         .enumerate()
         .find(|(_, (idx, _))| {
