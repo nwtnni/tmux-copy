@@ -3,13 +3,21 @@ use std::io;
 use std::process;
 
 /// Spawn an instance of `main`.
-pub fn spawn(active: &str) -> Result<(), io::Error> {
-    let main = format!("target/release/main {}", active);
+pub fn spawn() -> Result<(), io::Error> {
+    let pane = active()?;
+    let main = format!("target/release/main {}", pane.trim());
     let uuid = uuid::Uuid::new_v4().to_simple().to_string();
     command!("tmux", "new-window", "-dn", uuid, main)
         .spawn()?
         .wait()
         .map(drop)
+}
+
+/// Get the ID of the active `tmux` pane.
+fn active() -> Result<String, io::Error> {
+    command!("tmux", "list-panes", "-F", "#{?#{&&:#{pane_active},#{window_active}},#{pane_id},}")
+        .output()
+        .map(stdout)
 }
 
 /// Get the plain-text contents of `pane`.
