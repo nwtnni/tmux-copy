@@ -32,8 +32,7 @@ const PICK: ansi::Color = ansi::Color(11);
 fn main() -> Result<(), Box<dyn error::Error>> {
 
     // Retrieve active pane ID and socket path from arguments
-    let mut args = env::args().skip(1);
-    let pane = args.next().expect("Missing active pane");
+    let pane = env::args().nth(1).expect("Missing active pane");
 
     // Set up I/O
     let mut stdin = io::stdin();
