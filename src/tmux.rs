@@ -42,7 +42,13 @@ pub fn capture(pane: &str) -> Result<String, io::Error> {
 
 /// Write the full content (including ANSI escape sequences) of `pane` to `to`.
 pub fn render<W: io::Write>(pane: &str, mut to: W) -> Result<(), io::Error> {
-    command!("tmux", "capture-pane", "-ept", pane.trim())
+    #[cfg(feature = "fade")]
+    const FLAGS: &str = "-pt";
+
+    #[cfg(not(feature = "fade"))]
+    const FLAGS: &str = "-ept";
+
+    command!("tmux", "capture-pane", FLAGS, pane.trim())
         .output()
         .and_then(|mut out| {
             // Remove trailing newline

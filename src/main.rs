@@ -23,6 +23,10 @@ impl<'pane> Drop for Bomb<'pane> {
 /// Color of matching text
 const FULL: ansi::Color = ansi::Color(6);
 
+#[cfg(feature = "fade")]
+/// Color of unmatched text
+const FADE: ansi::Color = ansi::Color(8);
+
 /// Color of unselected hint
 const HINT: ansi::Color = ansi::Color(10);
 
@@ -53,8 +57,14 @@ fn main() -> Result<(), Box<dyn error::Error>> {
         .zip(&matches)
         .collect::<Vec<_>>();
 
+    // Faded background text
+    #[cfg(feature = "fade")] {
+      write!(&mut term, "{}", FADE)?;
+    }
+
     // Write out original text, matches, and hints
     tmux::render(&pane, &mut term)?;
+
     for (h, m) in &hints {
         write!(&mut term, "{}{}{}{}{}{}", m, FULL, m.txt, m, HINT, h)?;
     }

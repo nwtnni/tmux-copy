@@ -16,7 +16,7 @@ Requires [Rust][rust] to compile the binaries, and [tpm][tpm] to manage the `tmu
 - Add `set -g @plugin 'nwtnni/tmux-copy'` to your `.tmux.conf`
 - Install with `<PREFIX>-I`
 - Navigate to your plugin directory (typically `~/.tmux/plugins`)
-- Run `cargo build --release` to compile
+- Run `cargo build --release` to compile, or `cargo build --release --features fade` to enable faded background text
 
 ## Known Issues
 
