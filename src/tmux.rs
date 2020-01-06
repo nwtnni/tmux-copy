@@ -57,6 +57,14 @@ pub fn render<W: io::Write>(pane: &str, mut to: W) -> Result<(), io::Error> {
         })
 }
 
+/// Send `text` to `pane` as if typed.
+pub fn send(pane: &str, text: &str) -> Result<(), io::Error> {
+    command!("tmux", "send-keys", "-t", pane.trim(), text)
+        .spawn()?
+        .wait()
+        .map(drop)
+}
+
 /// Swap the current pane with another.
 pub fn swap(to: &str) -> Result<(), io::Error> {
     let from = env::var_os("TMUX_PANE").expect("Must be run in tmux");

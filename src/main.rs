@@ -72,7 +72,7 @@ fn main() -> Result<(), Box<dyn error::Error>> {
 
     // Swap with active pane
     tmux::swap(&pane)?;
-    
+
     // Ensure that we swap back
     let bomb = Bomb(&pane);
 
@@ -80,15 +80,25 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let mut input = String::with_capacity(2); 
     loop {
         input.push(term.next()?);
-        hints.retain(|(h, _)| h.starts_with(&input));
-        if hints.len() <= 1 { break }
+        hints.retain(|(hint, _)| {
+            hint.chars()
+                .zip(input.chars())
+                .all(|(a, b)| a.eq_ignore_ascii_case(&b))
+        });
+        if hints.len() <= 1 {
+            break;
+        }
         hints.iter().try_for_each(|(_, m)| write!(&mut term, "{}{}{}", m, PICK, input))?;
         term.flush()?;
     }
 
     // Copy selected text
     if let Some((_, m)) = hints.into_iter().next() {
-        ClipboardContext::new()?.set_contents(m.txt.into())?;
+        if input.contains(char::is_uppercase) {
+            tmux::send(&pane, m.txt)?;
+        } else {
+            ClipboardContext::new()?.set_contents(m.txt.into())?;
+        }
     }
 
     Ok(drop(bomb))
