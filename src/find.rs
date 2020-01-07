@@ -16,7 +16,7 @@ macro_rules! regex_set {
 regex_set! {
     IPV4: r"[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}";
     IPV6: r"[[:xdigit:]]+:+[[:xdigit:]]+[^[[:space:]]]+";
-    KUBE: r"[a-z0-9]+(?:-[a-z0-9]+)+";
+    NAME: r"[a-zA-Z0-9]+(?:[-_.:][a-zA-Z0-9]+)+";
     PATH: r"/?(?:[[[:word:]]-~\.]+/)+[[[:word:]]-\.]*";
     SHA:  r"[[:xdigit:]]{7, 40}";
     UID:  r"[[:xdigit:]]{8}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{4}-[[:xdigit:]]{12}";
