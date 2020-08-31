@@ -1,14 +1,24 @@
+use once_cell::sync;
+
 use crate::util;
 
 macro_rules! regex_set {
     ($($name:ident: $regex:expr);* $(;)?) => {
         paste::item! {
-            $(const $name: &str = $regex;)*
-            lazy_static::lazy_static! {
-                $(static ref [<$name _RE>]: regex::Regex = regex::Regex::new($name).unwrap();)*
-                static ref ALL_RE: [&'static regex::Regex; count!($($name),*)] = [$(&*[<$name _RE>]),*];
-                static ref SET_RE: regex::RegexSet = regex::RegexSet::new(&[$($name),*]).unwrap();
-            }
+            $(
+                static $name: &str = $regex;
+                static [<$name _RE>]: sync::Lazy<regex::Regex> = sync::Lazy::new(|| {
+                    regex::Regex::new($name).unwrap()
+                });
+            )*
+
+            static ALL_RE: sync::Lazy<[&'static regex::Regex; count!($($name),*)]> = sync::Lazy::new(|| {
+                [$(&*[<$name _RE>]),*]
+            });
+
+            static SET_RE: sync::Lazy<regex::RegexSet> = sync::Lazy::new(|| {
+                regex::RegexSet::new(&[$($name),*]).unwrap()
+            });
         }
     }
 }

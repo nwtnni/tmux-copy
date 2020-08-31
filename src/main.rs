@@ -2,12 +2,12 @@ use std::error;
 use std::env;
 use std::io;
 use std::io::Write;
-
-use clipboard::*;
+use std::net;
 
 use tmux_copy::ansi;
 use tmux_copy::find;
 use tmux_copy::hint;
+use tmux_copy::PORT;
 use tmux_copy::term;
 use tmux_copy::tmux;
 
@@ -92,13 +92,12 @@ fn main() -> Result<(), Box<dyn error::Error>> {
         term.flush()?;
     }
 
-    // Copy selected text
-    if let Some((_, m)) = hints.into_iter().next() {
-        if input.contains(char::is_uppercase) {
-            tmux::send(&pane, m.txt)?;
-        } else {
-            ClipboardContext::new()?.set_contents(m.txt.into())?;
-        }
+    let mut socket = net::TcpStream::connect((net::Ipv4Addr::LOCALHOST, PORT))?;
+
+    match hints.into_iter().next() {
+    | None => (),
+    | Some((_, m)) if input.contains(char::is_uppercase) => tmux::send(&pane, m.txt)?,
+    | Some((_, m)) => write!(socket, "{}", m.txt)?,
     }
 
     Ok(drop(bomb))

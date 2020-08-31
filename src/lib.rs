@@ -6,3 +6,5 @@ pub mod find;
 pub mod hint;
 pub mod term;
 pub mod tmux;
+
+pub const PORT: u16 = 53735;
