@@ -6,8 +6,7 @@ use std::process;
 pub fn spawn() -> Result<(), io::Error> {
     let pane = active()?;
     let main = format!("target/release/main {}", pane.trim());
-    let uuid = uuid::Uuid::new_v4().to_simple().to_string();
-    command!("tmux", "new-window", "-dn", uuid, main)
+    command!("tmux", "new-window", "-d", main)
         .spawn()?
         .wait()
         .map(drop)
