@@ -52,36 +52,36 @@ pub fn matches(text: &str) -> Vec<Match> {
         /// iteration, and (b) avoid having to name the
         /// `util::Lazy<F>` type in a function parameter.
         macro_rules! found {
-          ($match:expr) => {
-            {
-              let start = $match.start();
-              Match {
-                row: row as u16,
-                col: if ascii.force() { start } else { column(line, start) } as u16,
-                txt: $match.as_str(),
-              }
-            }
-          }
+            ($match:expr) => {{
+                let start = $match.start();
+                Match {
+                    row: row as u16,
+                    col: if ascii.force() {
+                        start
+                    } else {
+                        column(line, start)
+                    } as u16,
+                    txt: $match.as_str(),
+                }
+            }};
         }
 
         matches.extend(
-            SET_RE.matches(text)
+            SET_RE
+                .matches(text)
                 .iter()
                 .map(|index| ALL_RE[index])
                 .flat_map(move |re| {
-                  if re.captures_len() == 1 {
-                    util::Or::L(
-                      re.find_iter(line)
-                        .map(move |r#match| found!(r#match))
-                    )
-                  } else {
-                    util::Or::R(
-                      re.captures_iter(line)
-                        .filter_map(|capture| capture.get(1))
-                        .map(move |r#match| found!(r#match))
-                    )
-                  }
-                })
+                    if re.captures_len() == 1 {
+                        util::Or::L(re.find_iter(line).map(move |r#match| found!(r#match)))
+                    } else {
+                        util::Or::R(
+                            re.captures_iter(line)
+                                .filter_map(|capture| capture.get(1))
+                                .map(move |r#match| found!(r#match)),
+                        )
+                    }
+                }),
         );
     }
 
@@ -92,9 +92,7 @@ pub fn matches(text: &str) -> Vec<Match> {
 fn column(line: &str, index: usize) -> usize {
     line.char_indices()
         .enumerate()
-        .find(|(_, (idx, _))| {
-            *idx == index
-        })
+        .find(|(_, (idx, _))| *idx == index)
         .map(|(col, _)| col)
         .unwrap()
 }

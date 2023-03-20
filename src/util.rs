@@ -27,14 +27,16 @@ macro_rules! count {
         0usize
     };
     ($head:tt $(, $tail:tt)* $(,)?) => {
-        1usize + count!($($tail),*) 
+        1usize + count!($($tail),*)
     };
 }
 
 macro_rules! test {
     ($call:expr) => {
-        if $call != 0 { return Err(io::Error::last_os_error()) }
-    }
+        if $call != 0 {
+            return Err(io::Error::last_os_error());
+        }
+    };
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -44,14 +46,15 @@ pub enum Or<L, R> {
 }
 
 impl<L, R, T> Iterator for Or<L, R>
-    where L: Iterator<Item = T>,
-          R: Iterator<Item = T>,
+where
+    L: Iterator<Item = T>,
+    R: Iterator<Item = T>,
 {
     type Item = T;
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-        | Or::L(l) => l.next(),
-        | Or::R(r) => r.next(),
+            Or::L(l) => l.next(),
+            Or::R(r) => r.next(),
         }
     }
 }
@@ -71,11 +74,11 @@ impl<T: Copy, F: Fn() -> T> Lazy<T, F> {
 
     pub fn force(&self) -> T {
         match self.value.get() {
-        | Some(value) => value,
-        | None => {
-            self.value.set(Some((self.thunk)()));
-            self.force()
-        }
+            Some(value) => value,
+            None => {
+                self.value.set(Some((self.thunk)()));
+                self.force()
+            }
         }
     }
 }

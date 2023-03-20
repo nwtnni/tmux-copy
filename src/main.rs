@@ -1,5 +1,5 @@
-use std::error;
 use std::env;
+use std::error;
 use std::io;
 use std::io::Write;
 use std::net;
@@ -7,16 +7,16 @@ use std::net;
 use tmux_copy::ansi;
 use tmux_copy::find;
 use tmux_copy::hint;
-use tmux_copy::PORT;
 use tmux_copy::term;
 use tmux_copy::tmux;
+use tmux_copy::PORT;
 
 /// Destructor swaps back to original `tmux` pane.
 struct Bomb<'pane>(&'pane str);
 
 impl<'pane> Drop for Bomb<'pane> {
     fn drop(&mut self) {
-        tmux::swap(&self.0).ok();
+        tmux::swap(self.0).ok();
     }
 }
 
@@ -34,7 +34,6 @@ const HINT: ansi::Color = ansi::Color(10);
 const PICK: ansi::Color = ansi::Color(11);
 
 fn main() -> Result<(), Box<dyn error::Error>> {
-
     // Retrieve active pane ID and socket path from arguments
     let pane = env::args().nth(1).expect("Missing active pane");
 
@@ -50,16 +49,15 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     // Short-circuit without swapping if there are no matches
     if matches.is_empty() {
         tmux::display("No matches found.")?;
-        return Ok(())
+        return Ok(());
     }
 
-    let mut hints = hint::hints(matches.len())
-        .zip(&matches)
-        .collect::<Vec<_>>();
+    let mut hints = hint::hints(matches.len()).zip(&matches).collect::<Vec<_>>();
 
     // Faded background text
-    #[cfg(feature = "fade")] {
-      write!(&mut term, "{}", FADE)?;
+    #[cfg(feature = "fade")]
+    {
+        write!(&mut term, "{}", FADE)?;
     }
 
     // Write out original text, matches, and hints
@@ -77,9 +75,9 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let bomb = Bomb(&pane);
 
     // Blocking reads for user input
-    let mut input = String::with_capacity(2); 
+    let mut input = String::with_capacity(2);
     loop {
-        input.push(term.next()?);
+        input.push(term.read()?);
         hints.retain(|(hint, _)| {
             hint.chars()
                 .zip(input.chars())
@@ -88,17 +86,20 @@ fn main() -> Result<(), Box<dyn error::Error>> {
         if hints.len() <= 1 {
             break;
         }
-        hints.iter().try_for_each(|(_, m)| write!(&mut term, "{}{}{}", m, PICK, input))?;
+        hints
+            .iter()
+            .try_for_each(|(_, m)| write!(&mut term, "{}{}{}", m, PICK, input))?;
         term.flush()?;
     }
 
     let mut socket = net::TcpStream::connect((net::Ipv4Addr::LOCALHOST, PORT))?;
 
     match hints.into_iter().next() {
-    | None => (),
-    | Some((_, m)) if input.contains(char::is_uppercase) => tmux::send(&pane, m.txt)?,
-    | Some((_, m)) => write!(socket, "{}", m.txt)?,
+        None => (),
+        Some((_, m)) if input.contains(char::is_uppercase) => tmux::send(&pane, m.txt)?,
+        Some((_, m)) => write!(socket, "{}", m.txt)?,
     }
 
-    Ok(drop(bomb))
+    drop(bomb);
+    Ok(())
 }

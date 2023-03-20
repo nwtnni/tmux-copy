@@ -14,9 +14,14 @@ pub fn spawn() -> Result<(), io::Error> {
 
 /// Get the ID of the active `tmux` pane.
 fn active() -> Result<String, io::Error> {
-    command!("tmux", "list-panes", "-F", "#{?#{&&:#{pane_active},#{window_active}},#{pane_id},}")
-        .output()
-        .map(stdout)
+    command!(
+        "tmux",
+        "list-panes",
+        "-F",
+        "#{?#{&&:#{pane_active},#{window_active}},#{pane_id},}"
+    )
+    .output()
+    .map(stdout)
 }
 
 /// Display `message` in the status line.
