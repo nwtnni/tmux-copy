@@ -90,7 +90,7 @@ fn main() -> Result<(), Box<dyn error::Error + Send + Sync>> {
     }
 
     match hints.into_iter().next() {
-        None => (),
+        None => tmux::display("Selection cancelled.")?,
         Some((_, m)) if input.contains(char::is_uppercase) => tmux::send(&pane, m.txt)?,
         Some((_, m)) => clipboard.set_contents(String::from(m.txt))?,
     }
