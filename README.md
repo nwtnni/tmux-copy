@@ -6,8 +6,9 @@ A highly opinionated copying plugin inspired by several predecessors:
 - [tmux-picker][tp]
 - [tmux-thumbs][tt]
 
-Meant primarily for personal use. Works on Linux and MacOS, relying
-on [rust-clipboard][cb] for system clipboard support.
+Written primarily for personal use. Relies on [copypasta-ext][cb] for
+system clipboard support. Currently only used on Linux/Wayland, but
+in theory it should work on other operating systems.
 
 ## Installation
 
@@ -16,14 +17,12 @@ Requires [Rust][rust] to compile the binaries, and [tpm][tpm] to manage the `tmu
 - Add `set -g @plugin 'nwtnni/tmux-copy'` to your `.tmux.conf`
 - Install with `<PREFIX>-I`
 - Navigate to your plugin directory (typically `~/.tmux/plugins`)
-- Run `cargo build --release` to compile, or `cargo build --release --features fade` to enable faded background text
+- Run `cargo build --release` to compile
 
 ## Known Issues
 
 - Not very configurable
 - Requires Rust compiler to build binaries from source
-- Doesn't support zoomed `tmux` panes
-- Doesn't support scrolled `tmux` panes
 - Allows overlapping matches
 
 ## "Configuration"
@@ -46,10 +45,10 @@ Requires [Rust][rust] to compile the binaries, and [tpm][tpm] to manage the `tmu
 
 [ct]: https://github.com/nwtnni/tmux-copy/blob/8fd1d3340f4628b45cf8998141db9bce69f9e715/src/util.rs#L1-L11
 [tf]: https://github.com/Morantron/tmux-fingers
-[tp]: https://github.com/pawel-wiejacha/tmux-picker 
+[tp]: https://github.com/pawel-wiejacha/tmux-picker
 [tt]: https://github.com/fcsonline/tmux-thumbs
 [tc]: https://github.com/nwtnni/tmux-copy/blob/master/tmux-copy.tmux
-[cb]: https://github.com/aweinstock314/rust-clipboard
+[cb]: https://crates.io/crates/copypasta-ext
 [re]: https://docs.rs/regex/1.3.1/regex/
 [rs]: https://docs.rs/regex/1.3.1/regex/struct.RegexSet.html
 [tpm]: https://github.com/tmux-plugins/tpm
