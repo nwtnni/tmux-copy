@@ -5,7 +5,7 @@ authors = ["Newton Ni <nwtnni@gmail.com>"]
 edition = "2021"
 
 [features]
-default = []
+default = ["fade"]
 fade = []
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
