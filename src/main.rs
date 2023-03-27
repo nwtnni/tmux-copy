@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn error::Error + Send + Sync>> {
         return Ok(());
     }
 
-    let mut hints = hint::hints(matches.len()).zip(&matches).collect::<Vec<_>>();
+    let mut candidates = hint::hints(matches.len()).zip(&matches).collect::<Vec<_>>();
 
     #[cfg(feature = "fade")]
     {
@@ -60,8 +60,12 @@ fn main() -> Result<(), Box<dyn error::Error + Send + Sync>> {
         write!(&mut term, "{}", tmux::capture(&pane, true)?)?;
     }
 
-    for (h, m) in &hints {
-        write!(&mut term, "{}{}{}{}{}{}", m, FULL, m.txt, m, HINT, h)?;
+    for (hint, r#match) in &candidates {
+        write!(
+            &mut term,
+            "{}{}{}{}{}{}",
+            r#match, FULL, r#match.txt, r#match, HINT, hint,
+        )?;
     }
     term.flush()?;
 
@@ -74,24 +78,27 @@ fn main() -> Result<(), Box<dyn error::Error + Send + Sync>> {
     let mut input = String::with_capacity(2);
     loop {
         input.push(term.read()?);
-        hints.retain(|(hint, _)| {
+        candidates.retain(|(hint, _)| {
             hint.chars()
                 .zip(input.chars())
                 .all(|(a, b)| a.eq_ignore_ascii_case(&b))
         });
-        if hints.len() <= 1 {
+        if candidates.len() <= 1 {
             break;
         }
-        hints
+        candidates
             .iter()
-            .try_for_each(|(_, m)| write!(&mut term, "{}{}{}", m, PICK, input))?;
+            .try_for_each(|(_, r#match)| write!(&mut term, "{}{}{}", r#match, PICK, input))?;
         term.flush()?;
     }
 
-    match hints.into_iter().next() {
+    match candidates.into_iter().next() {
         None => tmux::display("Selection cancelled.")?,
-        Some((_, m)) if input.contains(char::is_uppercase) => tmux::send(&pane, m.txt)?,
-        Some((_, m)) => clipboard.set_contents(String::from(m.txt))?,
+        Some((_, r#match)) if input.contains(char::is_uppercase) => tmux::send(&pane, r#match.txt)?,
+        Some((_, r#match)) => {
+            clipboard.set_contents(String::from(r#match.txt))?;
+            tmux::display(&format!("Selected `{}`.", r#match.txt))?;
+        }
     }
 
     drop(bomb);
