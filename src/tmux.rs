@@ -2,18 +2,8 @@ use std::env;
 use std::io;
 use std::process;
 
-/// Spawn an instance of `main`.
-pub fn spawn() -> Result<(), io::Error> {
-    let pane = active()?;
-    let main = format!("target/release/main {}", pane.trim());
-    command!("tmux", "new-window", "-d", main)
-        .spawn()?
-        .wait()
-        .map(drop)
-}
-
 /// Get the ID of the active `tmux` pane.
-fn active() -> Result<String, io::Error> {
+pub fn active() -> Result<String, io::Error> {
     command!(
         "tmux",
         "list-panes",

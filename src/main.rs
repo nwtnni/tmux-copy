@@ -1,4 +1,3 @@
-use std::env;
 use std::error;
 use std::io;
 use std::io::Write;
@@ -32,9 +31,6 @@ const HINT: ansi::Color = ansi::Color(10);
 const PICK: ansi::Color = ansi::Color(11);
 
 fn main() -> Result<(), Box<dyn error::Error + Send + Sync>> {
-    // Retrieve active pane ID and socket path from arguments
-    let pane = env::args().nth(1).expect("Missing active pane");
-
     let mut clipboard = copypasta_ext::try_context().expect("Failed to initialize clipboard");
 
     // Set up I/O
@@ -43,6 +39,7 @@ fn main() -> Result<(), Box<dyn error::Error + Send + Sync>> {
     let mut term = term::Term::new(&mut stdin, &mut stdout)?;
 
     // Search for matches
+    let pane = tmux::active()?;
     let capture = tmux::capture(&pane)?;
     let matches = find::matches(&capture);
 

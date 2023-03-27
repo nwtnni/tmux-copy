@@ -3,7 +3,6 @@ name = "tmux-copy"
 version = "0.1.0"
 authors = ["Newton Ni <nwtnni@gmail.com>"]
 edition = "2021"
-default-run = "boot"
 
 [features]
 default = []
@@ -21,11 +20,3 @@ paste = "1.0"
 version = "1.7"
 default-features = false
 features = ["std", "perf"]
-
-[[bin]]
-name = "boot"
-path = "src/boot.rs"
-
-[[bin]]
-name = "main"
-path = "src/main.rs"
