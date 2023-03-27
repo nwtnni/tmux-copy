@@ -87,7 +87,7 @@ pub fn send(pane: &Pane, text: &str) -> Result<(), io::Error> {
 /// Swap the current pane with another.
 pub fn swap(to: &Pane) -> Result<(), io::Error> {
     let from = env::var_os("TMUX_PANE").expect("Must be run in tmux");
-    command!("tmux", "swap-pane", "-s", from, "-t", &to.id)
+    command!("tmux", "swap-pane", "-Z", "-s", from, "-t", &to.id)
         .spawn()?
         .wait()
         .map(drop)
