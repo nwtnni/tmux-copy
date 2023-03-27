@@ -9,7 +9,7 @@ use tmux_copy::term;
 use tmux_copy::tmux;
 
 /// Destructor swaps back to original `tmux` pane.
-struct Bomb<'pane>(&'pane str);
+struct Bomb<'pane>(&'pane tmux::Pane);
 
 impl<'pane> Drop for Bomb<'pane> {
     fn drop(&mut self) {
@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn error::Error + Send + Sync>> {
 
     // Search for matches
     let pane = tmux::active()?;
-    let capture = tmux::capture(&pane)?;
+    let capture = tmux::capture(&pane, false)?;
     let matches = find::matches(&capture);
 
     // Short-circuit without swapping if there are no matches
@@ -51,14 +51,14 @@ fn main() -> Result<(), Box<dyn error::Error + Send + Sync>> {
 
     let mut hints = hint::hints(matches.len()).zip(&matches).collect::<Vec<_>>();
 
-    // Faded background text
     #[cfg(feature = "fade")]
     {
-        write!(&mut term, "{}", FADE)?;
+        write!(&mut term, "{}{}", FADE, capture)?;
     }
-
-    // Write out original text, matches, and hints
-    tmux::render(&pane, &mut term)?;
+    #[cfg(not(feature = "fade"))]
+    {
+        write!(&mut term, "{}", tmux::capture(&pane, true)?)?;
+    }
 
     for (h, m) in &hints {
         write!(&mut term, "{}{}{}{}{}{}", m, FULL, m.txt, m, HINT, h)?;
@@ -68,7 +68,6 @@ fn main() -> Result<(), Box<dyn error::Error + Send + Sync>> {
     // Swap with active pane
     tmux::swap(&pane)?;
 
-    // Ensure that we swap back
     let bomb = Bomb(&pane);
 
     // Blocking reads for user input
