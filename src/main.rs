@@ -2,14 +2,12 @@ use std::env;
 use std::error;
 use std::io;
 use std::io::Write;
-use std::net;
 
 use tmux_copy::ansi;
 use tmux_copy::find;
 use tmux_copy::hint;
 use tmux_copy::term;
 use tmux_copy::tmux;
-use tmux_copy::PORT;
 
 /// Destructor swaps back to original `tmux` pane.
 struct Bomb<'pane>(&'pane str);
@@ -33,9 +31,11 @@ const HINT: ansi::Color = ansi::Color(10);
 /// Color of selected hint
 const PICK: ansi::Color = ansi::Color(11);
 
-fn main() -> Result<(), Box<dyn error::Error>> {
+fn main() -> Result<(), Box<dyn error::Error + Send + Sync>> {
     // Retrieve active pane ID and socket path from arguments
     let pane = env::args().nth(1).expect("Missing active pane");
+
+    let mut clipboard = copypasta_ext::try_context().expect("Failed to initialize clipboard");
 
     // Set up I/O
     let mut stdin = io::stdin();
@@ -92,12 +92,10 @@ fn main() -> Result<(), Box<dyn error::Error>> {
         term.flush()?;
     }
 
-    let mut socket = net::TcpStream::connect((net::Ipv4Addr::LOCALHOST, PORT))?;
-
     match hints.into_iter().next() {
         None => (),
         Some((_, m)) if input.contains(char::is_uppercase) => tmux::send(&pane, m.txt)?,
-        Some((_, m)) => write!(socket, "{}", m.txt)?,
+        Some((_, m)) => clipboard.set_contents(String::from(m.txt))?,
     }
 
     drop(bomb);
